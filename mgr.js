@@ -80,11 +80,11 @@ define(['managerAPI',
             header: 'Implicit Association Test'
         }],
 
-        explicits: [{
-            type: 'quest',
-            name: 'explicits',
-            scriptUrl: 'explicits.js'
-        }],
+        // explicits: [{
+        //     type: 'quest',
+        //     name: 'explicits',
+        //     scriptUrl: 'explicits.js'
+        // }],
 
         raceiat: [{
             type: 'time',
@@ -101,16 +101,16 @@ define(['managerAPI',
             //last:true, 
             header: 'You have completed the study'
         }], 
+		//This task waits until the data are sent to the server.
+        uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '}),
         
         //Use if you want to redirect the participants elsewhere at the end of the study
         redirect:
         [{ 
 			//Replace with any URL you need to put at the end of your study, or just remove this task from the sequence below
             type:'redirect', name:'redirecting', url: 'https://www.google.com/search' 
-        }],
+        }]
 		
-		//This task waits until the data are sent to the server.
-        uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
     });
 
     API.addSequence([
