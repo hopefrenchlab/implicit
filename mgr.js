@@ -1,15 +1,8 @@
 define(['managerAPI',
-		'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
+    'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
 
-
-	//You can use the commented-out code to get parameters from the URL.
-	//const queryString = window.location.search;
-    //const urlParams = new URLSearchParams(queryString);
-    //const pt = urlParams.get('pt');
-
-	var API    = new Manager();
-	//const subid = Date.now().toString(16)+Math.floor(Math.random()*10000).toString(16);
-	init_data_pipe(API, '6FGpeWQCJ472',  {file_type:'csv'});	
+  var API = new Manager();
+  init_data_pipe(API, '6FGpeWQCJ472', {file_type:'csv'});	
 
     API.setName('mgr');
     API.addSettings('skip',true);
@@ -28,14 +21,12 @@ define(['managerAPI',
     }
 
     API.addGlobal({
+        studyID: '',
         raceiat:{},
-        //YBYB: change when copying back to the correct folder
         baseURL: './images/',
         raceSet:raceSet,
         blackLabels:blackLabels,
         whiteLabels:whiteLabels,
-        //Select randomly what attribute words to see. 
-        //Based on Axt, Feng, & Bar-Anan (2021).
         posWords : API.shuffle([
             'Love', 'Cheer', 'Friend', 'Pleasure',
             'Adore', 'Cheerful', 'Friendship', 'Joyful', 
@@ -76,7 +67,20 @@ define(['managerAPI',
             inherit: 'instructions',
             name: 'studyID',
             templateUrl: 'studyId.jst',
-            title: 'Study ID'
+            title: 'Study ID',
+            header: 'Study ID Entry',
+            questions: [{
+                type: 'text',
+                name: 'studyID',
+                stem: 'Please enter your study ID:',
+                required: true,
+                errorMsg: {
+                    required: 'Please enter your study ID to continue.'
+                }
+            }],
+            onEnd: function(){
+                API.addGlobal({studyID: API.getCurrent().questions.studyID});
+            }
         }],
 
         raceiat_instructions: [{
@@ -90,7 +94,10 @@ define(['managerAPI',
         raceiat: [{
             type: 'time',
             name: 'raceiat',
-            scriptUrl: 'raceiat.js'
+            scriptUrl: 'raceiat.js',
+            onEnd: function(){
+                API.addGlobal({iatData: API.getCurrent().raceiat});
+            }
         }],
 
         lastpage: [{
@@ -98,29 +105,30 @@ define(['managerAPI',
             name: 'lastpage',
             templateUrl: 'lastpage.jst',
             title: 'End',
-            //Uncomment the following if you want to end the study here.
-            //last:true, 
             header: 'You have completed the study'
         }],
         
-        //Use if you want to redirect the participants elsewhere at the end of the study
-        redirect:
-        [{ 
-			//Replace with any URL you need to put at the end of your study, or just remove this task from the sequence below
-            type:'redirect', name:'redirecting', url: 'https://hope.edu/' 
+        redirect: [{ 
+            type:'redirect', 
+            name:'redirecting', 
+            url: 'https://hope.edu/' 
         }],
-	    
-		//This task waits until the data are sent to the server.
-        uploading: uploading_task({header: 'Just a moment', body:'Please wait, sending data... '})
-		
+      
+        uploading: [{
+            type: 'post',
+            path: ['studyID', 'iatData'],
+            data: {
+                sessionId: API.getGlobal().sessionId,
+                raceSet: API.getGlobal().raceSet,
+                blackLabels: API.getGlobal().blackLabels,
+                whiteLabels: API.getGlobal().whiteLabels
+            }
+        }]
     });
 
     API.addSequence([
-        { type: 'isTouch' }, //Use Minno's internal touch detection mechanism. 
+        { type: 'isTouch' },
         
-        { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels'] },
-
-        // apply touch only styles
         {
             mixer:'branch',
             conditions: {compare:'global.$isTouch', to: true},
@@ -137,15 +145,12 @@ define(['managerAPI',
                         '[pi-quest]::after {clear: both;}',
                         '[pi-quest] h3 { border-bottom: 1px solid transparent; border-top-left-radius: 3px; border-top-right-radius: 3px; padding: 10px 15px; color: inherit; font-size: 2em; margin-bottom: 20px; margin-top: 0;background-color: #d9edf7;border-color: #bce8f1;color: #31708f;}',
                         '[pi-quest] .form-group > label {font-size:1.2em; font-weight:normal;}',
-
                         '[pi-quest] .btn-toolbar {margin:15px;float:none !important; text-align:center;position:relative;}',
                         '[pi-quest] [ng-click="decline($event)"] {position:absolute;right:0;bottom:0}',
                         '[pi-quest] [ng-click="submit()"] {width:30%;line-height: 1.3333333;border-radius: 6px;}',
-                        // larger screens
                         '@media (min-width: 480px) {',
                         ' [pi-quest] [ng-click="submit()"] {width:30%;padding: 10px 16px;font-size: 1.6em;}',
                         '}',
-                        // phones and smaller screens
                         '@media (max-width: 480px) {',
                         ' [pi-quest] [ng-click="submit()"] {padding: 8px 13px;font-size: 1.2em;}',
                         ' [pi-quest] [ng-click="decline($event)"] {font-size: 0.9em;padding:3px 6px;}',
@@ -155,14 +160,11 @@ define(['managerAPI',
             ]
         },
         
-        
         {inherit: 'intro'},
-        { inherit: 'study_id_question' },
+        {inherit: 'study_id_question'},
         {
             mixer:'random',
             data:[
-
-                // force the instructions to preceed the iat
                 {
                     mixer: 'wrapper',
                     data: [
@@ -173,10 +175,10 @@ define(['managerAPI',
             ]
         },
 
-		    {inherit: 'uploading'},
+        {inherit: 'uploading'},
         {inherit: 'lastpage'},
         {inherit: 'redirect'}
     ]);
 
     return API.script;
-});
+  });
