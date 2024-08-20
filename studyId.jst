@@ -1,0 +1,25 @@
+<div class="panel panel-info" style="margin-top:1em">
+    <div class="panel-heading">
+        <h1 class="panel-title" style="font-size:2em">
+            Study ID
+        </h1>
+    </div>
+</div>
+
+<div class="panel-body">
+    <p class='lead'>
+        Please enter your study ID below.
+    </p>
+    <p>This is the ID provided in the email with your survey links, not your student or teacher ID.</p>
+    <div class="form-group text-center">
+        <input type="text" ng-model="current.response" class="form-control" required />
+        <p ng-show="form.studyID.$error.required" class="text-danger" style="margin-top: 10px;">
+            You must enter your study ID to continue.
+        </p>
+    </div>
+    <div class="text-center proceed" style="margin: 30px auto 10px;">
+        <button pi-message-done type="button" class="btn btn-primary">
+            Continue
+        </button>
+    </div>
+</div>

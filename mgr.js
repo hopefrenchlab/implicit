@@ -72,6 +72,13 @@ define(['managerAPI',
             header: 'Welcome'
         }],
 
+        study_id_question: [{
+            inherit: 'instructions',
+            name: 'studyID',
+            templateUrl: 'studyId.jst',
+            title: 'Study ID'
+        }],
+
         raceiat_instructions: [{
             inherit: 'instructions',
             name: 'raceiat_instructions',
@@ -100,11 +107,11 @@ define(['managerAPI',
         redirect:
         [{ 
 			//Replace with any URL you need to put at the end of your study, or just remove this task from the sequence below
-            type:'redirect', name:'redirecting', url: 'https://www.google.com/search' 
+            type:'redirect', name:'redirecting', url: 'https://hope.edu/' 
         }],
 	    
 		//This task waits until the data are sent to the server.
-        uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
+        uploading: uploading_task({header: 'Just a moment', body:'Please wait, sending data... '})
 		
     });
 
@@ -150,6 +157,7 @@ define(['managerAPI',
         
         
         {inherit: 'intro'},
+        { inherit: 'study_id_question' },
         {
             mixer:'random',
             data:[
@@ -165,7 +173,7 @@ define(['managerAPI',
             ]
         },
 
-		{inherit: 'uploading'},
+		    {inherit: 'uploading'},
         {inherit: 'lastpage'},
         {inherit: 'redirect'}
     ]);
